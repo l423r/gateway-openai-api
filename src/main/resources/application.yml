@@ -1,0 +1,35 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: gateway-openai-api
+  cloud:
+    gateway:
+      routes:
+        - id: openai-route
+          uri: https://api.openai.com/v1
+          predicates:
+            - Path=/openai/**
+          filters:
+            - StripPrefix=1
+#            - name: OpenAiAuthFilter
+
+      # Глобальные настройки CORS или другие глобальные фильтры
+
+      globalcors:
+        corsConfigurations:
+          "[/**]":
+            allowedOrigins: "*"
+            allowedHeaders: "*"
+            allowedMethods: "*"
+            maxAge: 3600
+
+logging:
+  level:
+    root: INFO
+    # Логгирование Spring Cloud Gateway (для отладки можно включить DEBUG или TRACE)
+    org.springframework.cloud.gateway: DEBUG
+    # Логгирование WebFlux / Reactor Netty, если нужно отследить запросы на низком уровне
+    reactor.netty: INFO
+
