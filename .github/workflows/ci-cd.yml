@@ -48,7 +48,6 @@ jobs:
           docker push ghcr.io/${{ github.repository_owner }}/gateway-openai-api:latest
 
   deploy:
-    # Запускать job раздельно или только при push в main (на ваше усмотрение)
     needs: build_and_push
     runs-on: ubuntu-latest
     steps:
@@ -58,15 +57,35 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           password: ${{ secrets.SERVER_PASSWORD }}
-          # Порт по умолчанию 22 (можно переопределить параметром port:)
           script: |
+            echo "Checking if Docker is installed on remote server..."
+
+            # 1. Проверяем, есть ли команда docker.
+            # Если нет — устанавливаем (пример для Ubuntu/Debian).
+            if ! command -v docker &> /dev/null
+            then
+              echo "Docker not found. Installing Docker..."
+              # Если у вас есть sudo — пользуемся им:
+              sudo apt-get update -y
+              sudo apt-get install -y docker.io
+              # Можно добавить:
+              # sudo systemctl enable docker
+              # sudo systemctl start docker
+              echo "Docker has been installed."
+            else
+              echo "Docker is already installed."
+            fi
+
+            # 2. Пробуем тянуть образ.
             echo "Pulling latest image from GHCR..."
             docker pull ghcr.io/${{ github.repository_owner }}/gateway-openai-api:latest
 
+            # 3. Останавливаем и удаляем предыдущий контейнер (если есть).
             echo "Stop and remove old container if it exists..."
             docker stop gateway-openai-api || true
             docker rm gateway-openai-api || true
 
+            # 4. Запускаем новый контейнер.
             echo "Starting new container..."
             docker run -d \
               --name gateway-openai-api \
