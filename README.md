@@ -9,6 +9,7 @@
     - [Локальный запуск (Gradle)](#локальный-запуск-gradle)
     - [Сборка и запуск Docker-образа](#сборка-и-запуск-docker-образа)
 4. [Конфигурация](#конфигурация)
+    - [Прозрачный прокси и роутер](#прозрачный-прокси-и-роутер)
 5. [Пример использования](#пример-использования)
 6. [Логирование](#логирование)
 7. [Структура проекта](#структура-проекта)
@@ -19,6 +20,7 @@
 ## Особенности проекта
 - Использует **Java 17** и **Spring Boot 3**
 - Включает **Spring Cloud Gateway** для маршрутизации трафика к OpenAI API ( https://api.openai.com )
+- **Режим прозрачного прокси**: по запросу с роутера (DNAT) проксирует выбранные домены (YouTube, Instagram, Netflix, Mastodon, OpenAI и др.) на целевой хост; опционально весь исходящий трафик можно направить через внешний HTTP/SOCKS-прокси.
 - Может добавлять или не добавлять заголовок `Authorization: Bearer <API_KEY>` в зависимости от настроек
 - Удобно масштабируется и настраивается через `application.yml`
 - Возможен **multi-stage Docker build** (Gradle + Temurin JDK 17)
@@ -89,8 +91,27 @@
       ```
     - Этот маршрут перенаправляет любой запрос `http://<gateway_host>:8080/openai/...` к `https://api.openai.com/v1/...`, убирая префикс `/openai`.
 - **Логирование**: настраивается через секцию `logging.level` в `application.yml` или в `logback-spring.xml`.
+- **Прозрачный прокси** (см. [Прозрачный прокси и роутер](#прозрачный-прокси-и-роутер)):
+  - `proxy.domains` — список доменов/паттернов (Ant-style) через запятую, например: `**.youtube.com`, `**.instagram.com`, `api.openai.com`, `**.mastodon.social`.
+  - `proxy.upstream` — опциональный исходящий прокси: `enabled`, `type` (HTTP/SOCKS5), `host`, `port`, при необходимости `username`/`password` (лучше через переменные окружения).
 
 > **Важно**: Если требуется добавлять/менять заголовок `Authorization`, настройте соответствующий фильтр (например, `OpenAiAuthFilter`).
+
+### Прозрачный прокси и роутер
+
+Сервер может работать как прозрачный HTTP-прокси при перенаправлении трафика с роутера (например, ASUS RT-AX53U) через iptables DNAT. Схема потока: [docs/transparent-proxy-flow.md](docs/transparent-proxy-flow.md).
+
+**Ограничение:** в текущей реализации поддерживается только **HTTP** (порт 80). HTTPS (порт 443) потребует терминирования TLS на gateway и доверия к сертификату на клиентах.
+
+**Пример iptables на роутере** (доступ по SSH, подставьте IP gateway и порт):
+
+```bash
+# Весь HTTP-трафик (порт 80) направлять на Spring Cloud Gateway
+iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination 192.168.1.100:8080
+iptables -t nat -A POSTROUTING -j MASQUERADE
+```
+
+Чтобы проксировать только выбранные домены, настройте правила по `-d` (destination) или используйте список доменов в `proxy.domains` в gateway — тогда на роутере можно направлять на gateway только нужный трафик (по IP/доменам).
 
 ---
 
@@ -132,15 +153,20 @@
 
 ```
 gateway-openai-api
-├─ gradle/                 # служебные файлы Gradle
-├─ build/                  # автоматически создаётся при сборке
+├─ docs/
+│  └─ transparent-proxy-flow.md   # Диаграмма потока прозрачного прокси (Mermaid)
+├─ gradle/                        # служебные файлы Gradle
+├─ build/                         # автоматически создаётся при сборке
 ├─ src/
 │  └─ main/
 │     ├─ java/
 │     │  └─ ru/svolyrk/gatewayopenaiapi/
 │     │     ├─ GatewayOpenaiApiApplication.java   # Основной класс Spring Boot
 │     │     └─ config/
-│     │        └─ LoggingGlobalFilter.java        # Пример глобального фильтра для логирования
+│     │        ├─ LoggingGlobalFilter.java        # Глобальный фильтр логирования
+│     │        ├─ ProxyProperties.java             # Конфигурация proxy.domains / proxy.upstream
+│     │        ├─ TransparentProxyFilter.java     # Подстановка целевого URL по Host для прозрачного прокси
+│     │        └─ UpstreamProxyCustomizer.java    # Настройка исходящего HTTP/SOCKS-прокси
 │     └─ resources/
 │        ├─ application.yml                       # Конфигурация Spring Boot/Cloud Gateway
 │        └─ logback-spring.xml                    # (Опционально) расширенная конфигурация логов
@@ -150,8 +176,10 @@ gateway-openai-api
 ```
 
 - **GatewayOpenaiApiApplication** — точка входа (Spring Boot).
-- **application.yml** — основные настройки.
-- **LoggingGlobalFilter** — пример фильтра, логирующего запросы.
+- **application.yml** — основные настройки и маршруты (OpenAI + прозрачный прокси).
+- **LoggingGlobalFilter** — логирование входящих запросов и кодов ответа.
+- **ProxyProperties**, **TransparentProxyFilter**, **UpstreamProxyCustomizer** — конфигурация и логика прозрачного прокси.
+- **docs/transparent-proxy-flow.md** — диаграмма архитектуры потока запросов.
 
 ---
 

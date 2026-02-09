@@ -1,6 +1,17 @@
 server:
   port: 8080
 
+# Список доменов для прозрачного прокси (через роутер DNAT). Строка для предиката Host и фильтра.
+proxy:
+  domains: "**.youtube.com,**.youtube-nocookie.com,**.instagram.com,**.netflix.com,api.openai.com,**.mastodon.social,**.mastodon.*"
+  upstream:
+    enabled: false
+    type: HTTP
+    host: proxy.example.com
+    port: 3128
+    # username: ${PROXY_USER:}
+    # password: ${PROXY_PASSWORD:}
+
 spring:
   application:
     name: gateway-openai-api
@@ -14,6 +25,13 @@ spring:
           filters:
             - StripPrefix=1
 #            - name: OpenAiAuthFilter
+
+        - id: transparent-proxy-route
+          uri: https://proxy-placeholder.invalid
+          predicates:
+            - Host=${proxy.domains}
+          filters:
+            - PreserveHostHeader
 
       # Глобальные настройки CORS или другие глобальные фильтры
 

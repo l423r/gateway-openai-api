@@ -1,0 +1,37 @@
+package ru.svolyrk.gatewayopenaiapi;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.gateway.filter.GatewayFilter;
+import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
+
+@Configuration
+public class OpenAiAuthFilter extends AbstractGatewayFilterFactory<OpenAiAuthFilter.Config> {
+
+    @Value("${openai.api-key}")
+    private String openAiApiKey;
+
+    public OpenAiAuthFilter() {
+        super(Config.class);
+    }
+
+    @Override
+    public GatewayFilter apply(Config config) {
+        return (exchange, chain) -> 
+            chain.filter(
+                exchange.mutate()
+                        .request(r -> r.headers(headers -> {
+                            // Удалим старый заголовок Authorization
+                            headers.remove(HttpHeaders.AUTHORIZATION);
+                            // Добавим свой
+                            headers.add(HttpHeaders.AUTHORIZATION, "Bearer " + openAiApiKey);
+                        }))
+                        .build()
+            );
+    }
+
+    public static class Config {
+        // При необходимости можно добавить конфигурационные поля
+    }
+}

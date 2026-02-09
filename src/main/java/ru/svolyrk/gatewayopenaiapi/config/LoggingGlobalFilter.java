@@ -28,7 +28,6 @@ public class LoggingGlobalFilter implements GlobalFilter, Ordered {
             Mono.fromRunnable(() -> {
                 // Когда ответ сформировался, логируем статус
                 int statusCode = 0;
-                exchange.getResponse().getStatusCode();
                 statusCode = exchange.getResponse().getStatusCode().value();
                 log.info("[GATEWAY] Response status code: {}", statusCode);
             })
