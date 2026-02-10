@@ -1,6 +1,14 @@
 server:
   port: 8080
 
+# Второй коннектор: HTTPS на 8443 (keystore монтируется в /home/user/gateway-certs/ в Docker)
+gateway:
+  ssl:
+    enabled: true
+    port: 8443
+    keystore-path: /home/user/gateway-certs/gateway.p12
+    keystore-password: ${GATEWAY_SSL_KEYSTORE_PASSWORD:changeit}
+
 # Список доменов для прозрачного прокси (через роутер DNAT). Строка для предиката Host и фильтра.
 proxy:
   domains: "**.youtube.com,**.youtube-nocookie.com,**.instagram.com,**.netflix.com,api.openai.com,**.mastodon.social,**.mastodon.*"

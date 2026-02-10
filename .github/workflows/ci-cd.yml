@@ -96,9 +96,11 @@ jobs:
             docker stop gateway-openai-api || true
             docker rm gateway-openai-api || true
 
-            # 4. Запускаем новый контейнер.
+            # 4. Запускаем новый контейнер (HTTP 8080 + HTTPS 8443, сертификаты из /home/user/gateway-certs/).
             echo "Starting new container..."
             docker run -d \
               --name gateway-openai-api \
               -p 8080:8080 \
+              -p 443:8443 \
+              -v /home/user/gateway-certs:/home/user/gateway-certs:ro \
               ghcr.io/${{ github.repository_owner }}/gateway-openai-api:latest

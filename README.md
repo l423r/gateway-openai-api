@@ -99,9 +99,9 @@
 
 ### Прозрачный прокси и роутер
 
-Сервер может работать как прозрачный HTTP-прокси при перенаправлении трафика с роутера (например, ASUS RT-AX53U) через iptables DNAT. Схема потока: [docs/transparent-proxy-flow.md](docs/transparent-proxy-flow.md).
+Сервер может работать как прозрачный HTTP-прокси при перенаправлении трафика с роутера (например, ASUS RT-AX53U). Схема потока: [docs/transparent-proxy-flow.md](docs/transparent-proxy-flow.md). **Пошаговая настройка роутера:** [docs/router-setup.md](docs/router-setup.md). **Чтобы на gateway шёл только трафик к выбранным доменам (остальное не трогать):** настройка DNS на роутере (dnsmasq) — [docs/dnsmasq-only-selected-hosts.md](docs/dnsmasq-only-selected-hosts.md).
 
-**Ограничение:** в текущей реализации поддерживается только **HTTP** (порт 80). HTTPS (порт 443) потребует терминирования TLS на gateway и доверия к сертификату на клиентах.
+**Ограничение:** в текущей реализации поддерживается только **HTTP** (порт 80). HTTPS (порт 443) потребует терминирования TLS на gateway и доверия к сертификату на клиентах. **Создание сертификата в Windows 11 (cmd) и установка на Gateway в Docker (Debian):** [docs/certificate-windows-debian-docker.md](docs/certificate-windows-debian-docker.md).
 
 **Пример iptables на роутере** (доступ по SSH, подставьте IP gateway и порт):
 
