@@ -42,12 +42,18 @@ spring:
             - Host=${proxy.domains}
           filters:
             - PreserveHostHeader
+          metadata:
+            # Отключаем response-timeout для стриминга (videoplayback и др.),
+            # иначе соединение обрывается по таймауту (ERR_CONNECTION_RESET).
+            response-timeout: -1
 
-      # Глобальные настройки CORS или другие глобальные фильтры
-
+      # CORS только для /openai/** — для прозрачного прокси не добавляем CORS,
+      # иначе к заголовкам от upstream (например gstatic.com) добавляется ещё один
+      # Access-Control-Allow-Origin и в ответе получается "*, https://www.youtube.com",
+      # из-за чего браузер блокирует запрос (CORS: only one value allowed).
       globalcors:
         corsConfigurations:
-          "[/**]":
+          "[/openai/**]":
             allowedOrigins: "*"
             allowedHeaders: "*"
             allowedMethods: "*"
