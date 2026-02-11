@@ -47,12 +47,12 @@ openssl req -new -key gateway.key -out gateway.csr -subj "/CN=gateway.local/O=Ga
 
 ### 1.4. Файл расширений (SAN) для gateway
 
-Нужен файл **gateway.ext** в той же папке (`%USERPROFILE%\ca`).
+Нужен файл **gateway.ext** в той же папке (`%USERPROFILE%\ca`). В SAN должны быть все домены, которые резолвятся в gateway (те же, что в dnsmasq на роутере), иначе браузер не примет сертификат для этих имён.
 
 **Способ 1 — Блокнот:**
 
 1. Выполните в cmd: `notepad gateway.ext`
-2. В Блокноте вставьте (домены при необходимости замените):
+2. В Блокноте вставьте (список соответствует доменам из dnsmasq: YouTube, Instagram, Netflix, OpenAI, Mastodon, Telegram):
 
 ```ini
 authorityKeyIdentifier=keyid,issuer
@@ -63,11 +63,21 @@ subjectAltName=@alt_names
 DNS.1=*.youtube.com
 DNS.2=youtube.com
 DNS.3=*.youtube-nocookie.com
-DNS.4=*.instagram.com
-DNS.5=*.netflix.com
-DNS.6=api.openai.com
-DNS.7=*.openai.com
-DNS.8=*.mastodon.social
+DNS.4=*.googlevideo.com
+DNS.5=*.instagram.com
+DNS.6=*.netflix.com
+DNS.7=*.nflxvideo.net
+DNS.8=api.openai.com
+DNS.9=*.openai.com
+DNS.10=*.mastodon.social
+DNS.11=*.ytimg.com
+DNS.12=*.ggpht.com
+DNS.13=*.gstatic.com
+DNS.14=*.googleapis.com
+DNS.15=*.telegram.org
+DNS.16=telegram.org
+DNS.17=*.t.me
+DNS.18=t.me
 ```
 
 3. Сохраните файл (кодировка UTF-8 или ANSI), закройте Блокнот.
@@ -82,11 +92,25 @@ echo subjectAltName=@alt_names>> gateway.ext
 echo [alt_names]>> gateway.ext
 echo DNS.1=*.youtube.com>> gateway.ext
 echo DNS.2=youtube.com>> gateway.ext
-echo DNS.3=*.instagram.com>> gateway.ext
-echo DNS.4=api.openai.com>> gateway.ext
+echo DNS.3=*.youtube-nocookie.com>> gateway.ext
+echo DNS.4=*.googlevideo.com>> gateway.ext
+echo DNS.5=*.instagram.com>> gateway.ext
+echo DNS.6=*.netflix.com>> gateway.ext
+echo DNS.7=*.nflxvideo.net>> gateway.ext
+echo DNS.8=api.openai.com>> gateway.ext
+echo DNS.9=*.openai.com>> gateway.ext
+echo DNS.10=*.mastodon.social>> gateway.ext
+echo DNS.11=*.ytimg.com>> gateway.ext
+echo DNS.12=*.ggpht.com>> gateway.ext
+echo DNS.13=*.gstatic.com>> gateway.ext
+echo DNS.14=*.googleapis.com>> gateway.ext
+echo DNS.15=*.telegram.org>> gateway.ext
+echo DNS.16=telegram.org>> gateway.ext
+echo DNS.17=*.t.me>> gateway.ext
+echo DNS.18=t.me>> gateway.ext
 ```
 
-При необходимости добавьте остальные DNS.N=... так же.
+Если позже добавите домены в dnsmasq — добавьте для них строки DNS.N=... в gateway.ext и перевыпустите сертификат (шаги 1.5 и 1.6).
 
 ### 1.5. Подпись сертификата gateway вашим CA
 

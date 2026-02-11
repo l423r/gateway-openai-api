@@ -1,0 +1,66 @@
+cp /tmp/etc/dnsmasq.conf /tmp/dnsmasq.conf
+cat /jffs/configs/dnsmasq.conf.add >> /tmp/dnsmasq.conf
+killall dnsmasq
+dnsmasq --conf-file=/tmp/dnsmasq.conf --log-async &
+
+
+
+
+ДОБАВЛЕНИЕ НОВЫХ ЗАПИСЕЙ
+
+cat >> /jffs/configs/dnsmasq.conf.add << 'EOF'
+
+address=/.googlevideo.com/88.210.20.137
+
+EOF
+
+
+Проверка в CMD
+
+nslookup api.openai.com
+nslookup youtube.com
+
+
+УДАЛЕНИЕ ФАЙЛА
+
+rm /tmp/dnsmasq.conf
+
+
+Проверить, что записалось
+
+tail -15 /jffs/configs/dnsmasq.conf.add
+
+cat /tmp/dnsmasq.conf
+
+
+
+
+ПРИМЕР ФАЙЛА.
+
+
+# Только эти домены резолвятся в IP gateway — трафик к ним идёт через gateway. Остальное — как обычно.
+# Формат: address=/.домен/IP
+# Точка перед доменом = сам домен и все поддомены (например .youtube.com = youtube.com, www.youtube.com, m.youtube.com и т.д.)
+
+address=/.youtube.com/88.210.20.137
+address=/.youtube-nocookie.com/88.210.20.137
+address=/.googlevideo.com/88.210.20.137
+address=/.instagram.com/88.210.20.137
+address=/.netflix.com/88.210.20.137
+address=/.nflxvideo.net/88.210.20.137
+address=/api.openai.com/88.210.20.137
+address=/.openai.com/88.210.20.137
+address=/.mastodon.social/88.210.20.137
+# Добавьте при необходимости другие инстансы Mastodon, например:
+# address=/.mastodon.example.com/88.210.20.137
+
+address=/.ytimg.com/88.210.20.137
+address=/.ggpht.com/88.210.20.137
+address=/.gstatic.com/88.210.20.137
+address=/.googleapis.com/88.210.20.137
+address=/.youtube-nocookie.com/88.210.20.137
+address=/.telegram.org/88.210.20.137
+address=/.t.me/88.210.20.137
+
+address=/.googlevideo.com/88.210.20.137
+

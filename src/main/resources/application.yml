@@ -11,7 +11,7 @@ gateway:
 
 # Список доменов для прозрачного прокси (через роутер DNAT). Строка для предиката Host и фильтра.
 proxy:
-  domains: "**.youtube.com,**.youtube-nocookie.com,**.instagram.com,**.netflix.com,api.openai.com,**.mastodon.social,**.mastodon.*"
+  domains: "**.youtube.com,**.youtube-nocookie.com,**.googlevideo.com,**.instagram.com,**.netflix.com,**.nflxvideo.net,api.openai.com,**.openai.com,**.mastodon.social,**.mastodon.*,**.ytimg.com,**.ggpht.com,**.gstatic.com,**.googleapis.com,**.telegram.org,**.t.me"
   upstream:
     enabled: false
     type: HTTP
