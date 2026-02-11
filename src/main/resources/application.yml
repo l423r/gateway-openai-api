@@ -10,8 +10,10 @@ gateway:
     keystore-password: ${GATEWAY_SSL_KEYSTORE_PASSWORD:changeit}
 
 # Список доменов для прозрачного прокси (через роутер DNAT). Строка для предиката Host и фильтра.
+# Для каждого домена добавлены варианты с :443 и :8443, чтобы запросы с Host: host:port тоже матчились
+# (иначе запросы к googlevideo.com и др. с портом в Host не попадают на transparent-proxy-route).
 proxy:
-  domains: "**.youtube.com,**.youtube-nocookie.com,**.googlevideo.com,**.instagram.com,**.netflix.com,**.nflxvideo.net,api.openai.com,**.openai.com,**.mastodon.social,**.mastodon.*,**.ytimg.com,**.ggpht.com,**.gstatic.com,**.googleapis.com,**.telegram.org,**.t.me"
+  domains: "**.youtube.com,**.youtube.com:443,**.youtube.com:8443,**.youtube-nocookie.com,**.youtube-nocookie.com:443,**.youtube-nocookie.com:8443,**.googlevideo.com,**.googlevideo.com:443,**.googlevideo.com:8443,**.instagram.com,**.instagram.com:443,**.instagram.com:8443,**.netflix.com,**.netflix.com:443,**.netflix.com:8443,**.nflxvideo.net,**.nflxvideo.net:443,**.nflxvideo.net:8443,api.openai.com,api.openai.com:443,api.openai.com:8443,**.openai.com,**.openai.com:443,**.openai.com:8443,**.mastodon.social,**.mastodon.social:443,**.mastodon.social:8443,**.mastodon.*,**.mastodon.*:443,**.mastodon.*:8443,**.ytimg.com,**.ytimg.com:443,**.ytimg.com:8443,**.ggpht.com,**.ggpht.com:443,**.ggpht.com:8443,**.gstatic.com,**.gstatic.com:443,**.gstatic.com:8443,**.googleapis.com,**.googleapis.com:443,**.googleapis.com:8443,**.telegram.org,**.telegram.org:443,**.telegram.org:8443,**.t.me,**.t.me:443,**.t.me:8443"
   upstream:
     enabled: false
     type: HTTP
