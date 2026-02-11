@@ -18,10 +18,11 @@ public class LoggingGlobalFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, org.springframework.cloud.gateway.filter.GatewayFilterChain chain) {
-        // Логируем информацию о запросе
+        // Логируем информацию о запросе (Host нужен для диагностики прозрачного прокси)
+        String host = exchange.getRequest().getHeaders().getFirst("Host");
         String requestPath = exchange.getRequest().getURI().getPath();
         String method = exchange.getRequest().getMethod().name();
-        log.info("[GATEWAY] Incoming request: {} {}", method, requestPath);
+        log.info("[GATEWAY] Incoming request: {} {} Host: {}", method, requestPath, host != null ? host : "-");
 
         // Продолжаем фильтрацию
         return chain.filter(exchange).then(
